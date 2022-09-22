@@ -1,0 +1,14 @@
+uint8 MOVE = 0
+uint8 DETECT_BOX = 1
+uint8 DETECT_OBJECTS = 2
+uint8 GRIPPER_GRASP = 4
+uint8 GRIPPER_RELEASE = 5
+uint8 task
+string sku_id
+string trajectory_plan
+geometry_msgs/PoseStamped target_location_pose
+---
+bool task_result
+---
+string current_sub_task
+builtin_interfaces/Time stamp

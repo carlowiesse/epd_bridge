@@ -1,0 +1,10 @@
+bool spawn_collision
+string perception_service
+string[] disabled_links
+---
+bool task_result
+Box[] boxes
+string info # informational, e.g. for error messages.
+---
+string current_sub_task
+builtin_interfaces/Time stamp

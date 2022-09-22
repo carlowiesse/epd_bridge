@@ -1,0 +1,4 @@
+string[] object_ids
+---
+bool success
+string info # informational, e.g. for error messages.

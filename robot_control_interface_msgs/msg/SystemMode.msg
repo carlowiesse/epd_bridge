@@ -1,0 +1,7 @@
+uint8 POWER_ON=0
+uint8 INIT=1
+uint8 CHANGE_OVER=2
+uint8 PRODUCTION=3
+uint8 POWER_OFF=4
+
+uint8 mode

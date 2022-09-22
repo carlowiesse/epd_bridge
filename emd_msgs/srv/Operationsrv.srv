@@ -1,0 +1,5 @@
+string actiongrp #either 'label' or 'pack' or 'ur' for both request
+string operation #either pause or resume request
+---
+bool acknowledgement
+string status   # pause operation acknowledgement

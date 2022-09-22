@@ -1,0 +1,5 @@
+string ee_link
+---
+bool success   # indicate successful run of triggered service
+string info # informational, e.g. for error messages.
+geometry_msgs/PoseStamped pose # EE pose for now.

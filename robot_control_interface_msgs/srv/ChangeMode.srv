@@ -1,0 +1,4 @@
+SystemMode new_mode
+---
+bool success   # indicate successful run of triggered service
+string info # informational, e.g. for error messages.

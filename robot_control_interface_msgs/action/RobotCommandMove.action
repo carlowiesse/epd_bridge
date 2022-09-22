@@ -1,0 +1,19 @@
+uint8 PLAN = 0
+uint8 PREPLANNED = 1
+uint8 RESET = 2
+
+geometry_msgs/PoseStamped target_location_pose
+GraspExecutionOptions options
+uint8 task
+bool plan_until_collide
+bool default_execution_method
+float64 velocity
+string trajectory_name
+string trajectory_file
+string target_id
+char axis
+---
+bool task_result
+---
+string current_sub_task
+builtin_interfaces/Time stamp

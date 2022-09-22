@@ -1,0 +1,6 @@
+bool grasp # false if release
+string object_id
+string ee_link
+---
+bool success   # indicate successful run of triggered service
+string info # informational, e.g. for error messages.

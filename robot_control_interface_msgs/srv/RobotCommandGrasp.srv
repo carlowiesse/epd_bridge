@@ -1,0 +1,5 @@
+uint8 GRASP = 0
+uint8 RELEASE = 1
+uint8 grasp_type
+---
+bool task_result

@@ -1,0 +1,5 @@
+bool single_object
+---
+bool success
+string info # informational, e.g. for error messages.
+Object[] objects

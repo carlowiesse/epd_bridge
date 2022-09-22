@@ -1,0 +1,10 @@
+string world_frame
+string planning_group
+string ee_link
+float32 move_to_collide_step_size
+float32 cartesian_step_size
+float32 clearance
+uint8 backtrack_steps
+uint8 hybrid_max_attempts
+uint8 non_deterministic_max_attempts
+string execution_method

@@ -1,0 +1,5 @@
+uint8 CYCLE_STOP=0
+uint8 CYCLE_PAUSE=1
+uint8 EMERGENCY_STOP=2
+
+uint8 mode
