@@ -83,11 +83,25 @@ ament_target_dependencies(human_vision
   robot_control_interface_msgs
 )
 
+add_executable(box_tray_vision src/box_tray_node.cpp src/utils.cpp)
+ament_target_dependencies(box_tray_vision
+  rclcpp
+  OpenCV
+  cv_bridge
+  std_msgs
+  shape_msgs
+  geometry_msgs
+  emd_msgs
+  epd_msgs
+  robot_control_interface_msgs
+)
+
 install(TARGETS
   box_vision
   label_vision
   tray_vision
   human_vision
+  box_tray_vision
   DESTINATION lib/${PROJECT_NAME}
 )
 
