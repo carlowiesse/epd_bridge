@@ -1,3 +1,4 @@
+float32 camera_height
 ---
 bool success
 string info # informational, e.g. for error messages.
