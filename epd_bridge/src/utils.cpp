@@ -18,12 +18,18 @@ std::string return_current_time_and_date()
     return ss.str();
 }
 
-std::vector<robot_control_interface_msgs::msg::Object> get_obj_list(epd_msgs::msg::EPDObjectLocalization epd_output, std::string camera_name, std::string object_name)
+std::vector<robot_control_interface_msgs::msg::Object> get_obj_list(epd_msgs::msg::EPDObjectLocalization epd_output, std::string camera_name, std::string object_name, float camera_height)
 { 
+    double ppx, ppy, fx, fy;
+    ppx = epd_output.ppx;
+    ppy = epd_output.ppy;
+    fx = epd_output.fx;
+    fy = epd_output.fy;
+    
     std::vector<robot_control_interface_msgs::msg::Object> objects;
     int idx=0;
     for (auto m : epd_output.objects) {
-        //if ( m.name == "tray" ) continue;
+        if ( m.name == "tray" ) continue;
         robot_control_interface_msgs::msg::Object obj;
 
         geometry_msgs::msg::PoseStamped pose;
@@ -38,35 +44,74 @@ std::vector<robot_control_interface_msgs::msg::Object> get_obj_list(epd_msgs::ms
         //std::cout << "Object [" << idx << "]: angle ->" << angle << std::endl;
         //std::cout << "Object [" << idx << "]: y-vector ->" << m.axis.y << std::endl;
         //std::cout << "Object [" << idx << "]: x-vector ->" << m.axis.x << std::endl;
+        
         pose.pose.orientation.x = q.x();
         pose.pose.orientation.y = q.y();
         pose.pose.orientation.z = q.z();
         pose.pose.orientation.w = q.w();
 
-        pose.pose.position.x = m.centroid.x;
-        pose.pose.position.y = m.centroid.y;
-        pose.pose.position.z = m.centroid.z;
-
+        //pose.pose.position.x = m.centroid.x;
+        //pose.pose.position.y = m.centroid.y;
+        //pose.pose.position.z = m.centroid.z;
+          
         if (object_name == "BOX") {
-            pose.pose.position.x += 0.015;
-            pose.pose.position.y -= 0.005;
             //pose.pose.position.z += 0.05 - 0.0353/2;
-            pose.pose.position.z = 0.55 - 0.0353/2 + 0.02;
-        } else {
-            pose.pose.position.x += 0.01;
-            //pose.pose.position.x += 0.11;
-            pose.pose.position.y -= 0.01;
-            //pose.pose.position.z += 0.025;
-            pose.pose.position.z = 0.33;
+            
+            //pose.pose.position.x += 0.015;
+            //pose.pose.position.y -= 0.005;
+            //pose.pose.position.z = 0.55 - 0.0353/2 + 0.02;
+            
+            pose.pose.position.x = 0;
+            pose.pose.position.y = 0;
+            
+            if (camera_height < 0.55) {
+                pose.pose.position.z = camera_height - 0.04/2 + 0.01;
+            } else {
+                pose.pose.position.z = camera_height - 0.04/2 - 0.02 + 0.015;
+            }
         }
 
+        if (object_name == "LABEL") {
+            //pose.pose.position.x += 0.11;
+            //pose.pose.position.z += 0.025;
+            
+            //pose.pose.position.x += 0.01; 
+            //pose.pose.position.y -= 0.01;
+            //pose.pose.position.z = 0.33;
+            
+            pose.pose.position.x = 0;
+            pose.pose.position.y = 0;
+        
+            if (camera_height < 0.3) {
+                pose.pose.position.z = camera_height - 0.04;
+            } else {
+                pose.pose.position.z = camera_height;
+            }
+        }
+
+        float obj_surface_depth = m.centroid.z - m.height/2;
+        float px = m.centroid.x / obj_surface_depth * fx + ppx;
+        float py = m.centroid.y / obj_surface_depth * fy + ppy;
+
+        float x = (px - ppx) / fx * pose.pose.position.z;
+        float y = (py - ppy) / fy * pose.pose.position.z;
+
+        pose.pose.position.x += x;
+        pose.pose.position.y += y;
+        
         shape_msgs::msg::SolidPrimitive shape;
         shape.type = 1;
         shape.dimensions.insert(shape.dimensions.end(), { m.length, m.breadth, m.height });
 
         if (object_name == "BOX") {
+            shape.dimensions[0] = 0.121;
+            shape.dimensions[1] = 0.066;
             shape.dimensions[2] = 0.04;
-        } else {
+        }
+
+        if (object_name == "LABEL") {
+            shape.dimensions[0] = 0.1;
+            shape.dimensions[1] = 0.05;
             shape.dimensions[2] = 0.001;
         }
         
@@ -85,8 +130,14 @@ std::vector<robot_control_interface_msgs::msg::Object> get_obj_list(epd_msgs::ms
     return objects;
 }
 
-std::vector<robot_control_interface_msgs::msg::Box> get_box_list(epd_msgs::msg::EPDObjectLocalization epd_output, std::string camera_name, std::string object_name)
+std::vector<robot_control_interface_msgs::msg::Box> get_box_list(epd_msgs::msg::EPDObjectLocalization epd_output, std::string camera_name, std::string object_name, float camera_height)
 {
+    double ppx, ppy, fx, fy;
+    ppx = epd_output.ppx;
+    ppy = epd_output.ppy;
+    fx = epd_output.fx;
+    fy = epd_output.fy;
+    
     std::vector<robot_control_interface_msgs::msg::Box> boxes;
     int idx=0;
     for (auto m : epd_output.objects) { 
@@ -106,13 +157,29 @@ std::vector<robot_control_interface_msgs::msg::Box> get_box_list(epd_msgs::msg::
         pose.pose.orientation.z = q.z();
         pose.pose.orientation.w = q.w();
 
-        pose.pose.position.x = m.centroid.x;
         //pose.pose.position.x = m.centroid.x + 0.02;
-        pose.pose.position.y = m.centroid.y;
         //pose.pose.position.z = m.centroid.z;
         //pose.pose.position.z = 0.55 - 0.1/2 + 0.06;
-        pose.pose.position.z = 0.55 - 0.1/2 + 0.04;
+        
+        //pose.pose.position.x = m.centroid.x;
+        //pose.pose.position.y = m.centroid.y;
+        //pose.pose.position.z = 0.55 - 0.1/2 + 0.04;
 
+        pose.pose.position.x = 0;
+        pose.pose.position.y = 0;
+        //pose.pose.position.z = camera_height - 0.1/2 - 0.02;
+        pose.pose.position.z = camera_height - 0.1/2;
+        
+        float obj_surface_depth = m.centroid.z - m.height/2;
+        float px = m.centroid.x / obj_surface_depth * fx + ppx;
+        float py = m.centroid.y / obj_surface_depth * fy + ppy;
+
+        float x = (px - ppx) / fx * pose.pose.position.z;
+        float y = (py - ppy) / fy * pose.pose.position.z;
+
+        pose.pose.position.x += x;
+        pose.pose.position.y += y;
+        
         box.box_pose = pose;
         //box.box_dimensions.insert(box.box_dimensions.end(), { m.length, m.breadth, m.height });
         //box.box_dimensions.insert(box.box_dimensions.end(), { m.length, m.breadth, 0.1 });

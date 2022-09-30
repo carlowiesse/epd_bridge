@@ -8,7 +8,7 @@ class VisionNode : public rclcpp::Node
 {
 public:
   VisionNode()
-  : Node("vision_service_box")
+  : Node("vision_service_box"), camera_height(0.0)
   {
     subscription_ = this->create_subscription<epd_msgs::msg::EPDObjectLocalization>(
     "/easy_perception_deployment/epd_localize_output_box", 1, std::bind(&VisionNode::epd_callback, this, _1));
@@ -28,20 +28,20 @@ private:
     
     if (msg->objects.size() > 0) {
       epd_msgs::msg::EPDObjectLocalization epd_output = *msg;
-      std::vector<robot_control_interface_msgs::msg::Object> new_objects = get_obj_list(epd_output, "pack_camera", "BOX");
+      std::vector<robot_control_interface_msgs::msg::Object> new_objects = get_obj_list(epd_output, "pack_camera", "BOX", camera_height);
       objects.insert(objects.end(), new_objects.begin(), new_objects.end());
     }
   }
   
   void detect(const std::shared_ptr<robot_control_interface_msgs::srv::DetectObjects::Request> request, std::shared_ptr<robot_control_interface_msgs::srv::DetectObjects::Response> response)
   {
+    camera_height = request->camera_height;
     RCLCPP_INFO(this->get_logger(), "Number of objects detected: %d", objects.size());
  
     std::string timestamp = return_unix_timestamp();
     auto id = std::stoll(timestamp);
     std::string str_id = std::to_string(id);  
     cv::imwrite("box_"+str_id+".png",frame);
-
 
     if (objects.size() > 0) {
       response->success = true;
@@ -58,11 +58,11 @@ private:
         }
         std::vector<robot_control_interface_msgs::msg::Object> single_object;
         single_object.push_back(objects[winner_idx]);
-        if (request->camera_height < 0.55) {
-          single_object[0].pose.pose.position.z = request->camera_height-0.04/2;
-        } else {
-          single_object[0].pose.pose.position.z = request->camera_height-0.04/2-0.02;
-        }
+        //if (request->camera_height < 0.55) {
+        //  single_object[0].pose.pose.position.z = request->camera_height-0.04/2;
+        //} else {
+        //  single_object[0].pose.pose.position.z = request->camera_height-0.04/2-0.02;
+        //}
         std::cout << "Object 0" << " [" << single_object[0].id << "]" << std::endl;
         std::cout << "Orientation (quaternion) -> x: " << single_object[0].pose.pose.orientation.x << ", y: "<< single_object[0].pose.pose.orientation.y << ", z: " << single_object[0].pose.pose.orientation.z << ", w: " << single_object[0].pose.pose.orientation.w << std::endl;
         std::cout << "Position (x,y,z) -> x: " << single_object[0].pose.pose.position.x << ", y: " << single_object[0].pose.pose.position.y << ", z: " << single_object[0].pose.pose.position.z << std::endl;
@@ -72,11 +72,11 @@ private:
         response->objects = single_object;
       } else {
         for (int i=0; i < (int)objects.size(); i++) {
-          if (request->camera_height < 0.55) {
-            objects[i].pose.pose.position.z = request->camera_height-0.04/2+0.01;
-          } else {
-            objects[i].pose.pose.position.z = request->camera_height-0.04/2-0.02+0.015;
-          }
+          //if (request->camera_height < 0.55) {
+          //  objects[i].pose.pose.position.z = request->camera_height-0.04/2+0.01;
+          //} else {
+          //  objects[i].pose.pose.position.z = request->camera_height-0.04/2-0.02+0.015;
+          //}
           std::cout << "Object " << i << " [" << objects[i].id << "]" << std::endl;
           std::cout << "Orientation (quaternion) -> x: " << objects[i].pose.pose.orientation.x << ", y: "<< objects[i].pose.pose.orientation.y << ", z: " << objects[i].pose.pose.orientation.z << ", w: " << objects[i].pose.pose.orientation.w << std::endl;
           std::cout << "Position (x,y,z) -> x: " << objects[i].pose.pose.position.x << ", y: " << objects[i].pose.pose.position.y << ", z: " << objects[i].pose.pose.position.z << std::endl;
@@ -93,6 +93,7 @@ private:
   rclcpp::Service<robot_control_interface_msgs::srv::DetectObjects>::SharedPtr service_;
   std::vector<robot_control_interface_msgs::msg::Object> objects;
   cv::Mat frame;
+  float camera_height;
 };
 
 int main(int argc, char * argv[])

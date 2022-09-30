@@ -8,7 +8,7 @@ class VisionNode : public rclcpp::Node
 {
 public:
   VisionNode()
-  : Node("vision_service_box_tray")
+  : Node("vision_service_box_tray"), camera_height(0.0)
   {
     subscription_ = this->create_subscription<epd_msgs::msg::EPDObjectLocalization>(
     "/easy_perception_deployment/epd_localize_output_box_tray", 1, std::bind(&VisionNode::epd_callback, this, _1));
@@ -33,16 +33,17 @@ private:
     if (msg->objects.size() > 0) {
       epd_msgs::msg::EPDObjectLocalization epd_output = *msg;
       
-      std::vector<robot_control_interface_msgs::msg::Object> new_box_objects = get_obj_list(epd_output, "pack_camera", "BOX");
+      std::vector<robot_control_interface_msgs::msg::Object> new_box_objects = get_obj_list(epd_output, "pack_camera", "BOX", camera_height);
       box_objects.insert(box_objects.end(), new_box_objects.begin(), new_box_objects.end());
       
-      std::vector<robot_control_interface_msgs::msg::Box> new_tray_objects = get_box_list(epd_output, "pack_camera", "TRAY");
+      std::vector<robot_control_interface_msgs::msg::Box> new_tray_objects = get_box_list(epd_output, "pack_camera", "TRAY", camera_height);
       tray_objects.insert(tray_objects.end(), new_tray_objects.begin(), new_tray_objects.end());
     }
   }
   
   void detect_box(const std::shared_ptr<robot_control_interface_msgs::srv::DetectObjects::Request> request, std::shared_ptr<robot_control_interface_msgs::srv::DetectObjects::Response> response)
   {
+    camera_height = request->camera_height;
     RCLCPP_INFO(this->get_logger(), "Number of box objects detected: %d", box_objects.size());
  
     std::string timestamp = return_unix_timestamp();
@@ -67,11 +68,11 @@ private:
         }
         std::vector<robot_control_interface_msgs::msg::Object> single_object;
         single_object.push_back(box_objects[winner_idx]);
-        single_object[0].pose.pose.position.z = request->camera_height-0.04/2;
+        //single_object[0].pose.pose.position.z = request->camera_height-0.04/2;
         response->objects = single_object;
       } else {
-        for (int i=0; i < (int)box_objects.size(); i++)
-          box_objects[i].pose.pose.position.z = request->camera_height-0.04/2;
+        //for (int i=0; i < (int)box_objects.size(); i++)
+        //  box_objects[i].pose.pose.position.z = request->camera_height-0.04/2;
         response->objects = box_objects;
       }
     }
@@ -79,6 +80,7 @@ private:
   
   void detect_tray(const std::shared_ptr<robot_control_interface_msgs::srv::DetectBox::Request> request, std::shared_ptr<robot_control_interface_msgs::srv::DetectBox::Response> response)
   {
+    camera_height = request->camera_height;
     RCLCPP_INFO(this->get_logger(), "Number of tray objects detected: %d", tray_objects.size());
 
     std::string timestamp = return_unix_timestamp();
@@ -90,8 +92,8 @@ private:
     
     if (tray_objects.size() > 0) {
       response->success = true;
-      for (int i=0; i < (int)tray_objects.size(); i++)
-        tray_objects[i].box_pose.pose.position.z = request->camera_height - 0.1/2;
+      //for (int i=0; i < (int)tray_objects.size(); i++)
+      //  tray_objects[i].box_pose.pose.position.z = request->camera_height - 0.1/2;
       response->boxes = tray_objects;
     }
   }
@@ -102,6 +104,7 @@ private:
   std::vector<robot_control_interface_msgs::msg::Object> box_objects;
   std::vector<robot_control_interface_msgs::msg::Box> tray_objects;
   cv::Mat frame;
+  float camera_height;
 };
 
 int main(int argc, char * argv[])
