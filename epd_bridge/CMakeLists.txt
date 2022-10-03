@@ -21,6 +21,7 @@ find_package(std_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
+find_package(ur_msgs REQUIRED)
 find_package(emd_msgs REQUIRED)
 find_package(epd_msgs REQUIRED)
 find_package(robot_control_interface_msgs REQUIRED)
@@ -39,6 +40,7 @@ ament_target_dependencies(box_vision
   std_msgs
   shape_msgs
   geometry_msgs
+  ur_msgs
   emd_msgs
   epd_msgs
   robot_control_interface_msgs
@@ -52,6 +54,7 @@ ament_target_dependencies(label_vision
   std_msgs
   shape_msgs
   geometry_msgs
+  ur_msgs
   emd_msgs
   epd_msgs
   robot_control_interface_msgs
@@ -65,6 +68,7 @@ ament_target_dependencies(tray_vision
   std_msgs
   shape_msgs
   geometry_msgs
+  ur_msgs
   emd_msgs
   epd_msgs
   robot_control_interface_msgs
@@ -78,19 +82,7 @@ ament_target_dependencies(human_vision
   std_msgs
   shape_msgs
   geometry_msgs
-  emd_msgs
-  epd_msgs
-  robot_control_interface_msgs
-)
-
-add_executable(box_tray_vision src/box_tray_node.cpp src/utils.cpp)
-ament_target_dependencies(box_tray_vision
-  rclcpp
-  OpenCV
-  cv_bridge
-  std_msgs
-  shape_msgs
-  geometry_msgs
+  ur_msgs
   emd_msgs
   epd_msgs
   robot_control_interface_msgs
@@ -101,7 +93,6 @@ install(TARGETS
   label_vision
   tray_vision
   human_vision
-  box_tray_vision
   DESTINATION lib/${PROJECT_NAME}
 )
 
