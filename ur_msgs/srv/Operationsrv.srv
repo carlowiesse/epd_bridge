@@ -1,0 +1,4 @@
+string operation #either pause or resume request
+---
+bool acknowledgement
+string status   # pause operation acknowledgement
